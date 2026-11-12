@@ -34,7 +34,11 @@ jobs:
         shell: bash
         run: |
           python examples/demo_target.py --port 8787 &
-          sleep 2
+          # wait up to 30 s for the demo server (macOS runners start Python slowly)
+          for i in $(seq 1 30); do
+            python -c "import socket; socket.create_connection(('127.0.0.1', 8787), 1).close()" 2>/dev/null && break
+            sleep 1
+          done
           inject-test run -c examples/inject-test.json --only indirect --junit report.xml --no-color \
             && exit 1 || test $? -eq 1
           test -s report.xml
