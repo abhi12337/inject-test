@@ -42,3 +42,7 @@ inject_test = ["data/*.json"]
 testpaths = ["tests"]
 addopts = "-q"
 pythonpath = ["src"]
+
+[project.urls]
+Homepage = "https://github.com/abhi12337/inject-test"
+Issues = "https://github.com/abhi12337/inject-test/issues"
