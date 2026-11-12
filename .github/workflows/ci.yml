@@ -1,0 +1,40 @@
+# Tests for inject-test itself. No external network: the tests only talk to servers they
+# start on 127.0.0.1 and to Python functions.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e ".[test]"
+      - run: python -m pytest
+      - name: Demo bot must fail (it is deliberately vulnerable)
+        shell: bash
+        run: |
+          inject-test run --python examples/demo_target.py:handle -c examples/inject-test.json --brief --no-color \
+            && exit 1 || test $? -eq 1
+      - name: Demo bot over HTTP on 127.0.0.1
+        shell: bash
+        run: |
+          python examples/demo_target.py --port 8787 &
+          sleep 2
+          inject-test run -c examples/inject-test.json --only indirect --junit report.xml --no-color \
+            && exit 1 || test $? -eq 1
+          test -s report.xml

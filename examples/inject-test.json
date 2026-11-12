@@ -1,0 +1,14 @@
+{
+  "target": {
+    "url": "http://127.0.0.1:8787/chat",
+    "method": "POST",
+    "timeout": 10,
+    "concurrency": 4,
+    "rate_limit": 0,
+    "reply_path": "reply",
+    "tool_calls_path": "tool_calls",
+    "headers": {"Content-Type": "application/json"},
+    "body": {"message": "{{input}}", "document": "{{document}}", "messages": "{{messages}}"}
+  },
+  "detect": {"system_prompt_canary": "PLUM-ZEBRA-4471"}
+}

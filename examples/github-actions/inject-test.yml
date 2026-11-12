@@ -1,0 +1,44 @@
+# Copy to .github/workflows/inject-test.yml in your LLM app's repo.
+# It starts YOUR app inside the CI job and runs the attack cases against it on localhost.
+# Only test systems you own or are authorised to test. Never point this at a third party.
+name: inject-test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  inject-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Pin to a release tag or commit of inject-test you have reviewed.
+      - run: pipx install "git+https://github.com/OWNER/inject-test@v0.1.0"
+
+      # Start your app (replace with your own command). Use a test API key with a spend limit.
+      - name: Start the app under test
+        run: |
+          pip install -r requirements.txt
+          nohup python -m myapp.server --port 8787 > app.log 2>&1 &
+          sleep 5
+        env:
+          LLM_API_KEY: ${{ secrets.TEST_LLM_API_KEY }}
+
+      # LLM output varies between runs: repeat each case and fail on a rate, not on one hit.
+      - name: Prompt-injection tests (fail if 10% or more of attempts succeed)
+        run: inject-test run -c inject-test.toml --repeat 3 --fail-on 10% --no-color --junit inject-test.xml
+        env:
+          APP_TOKEN: ${{ secrets.TEST_APP_TOKEN }}   # referenced as ${APP_TOKEN} in inject-test.toml
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inject-test-report
+          path: inject-test.xml

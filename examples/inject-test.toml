@@ -1,0 +1,23 @@
+# Config for the bundled demo bot (examples/demo_target.py). Copy `inject-test init` output
+# for your own app instead. Only test systems you own or are authorised to test.
+
+[target]
+url = "http://127.0.0.1:8787/chat"
+method = "POST"
+timeout = 10
+concurrency = 4
+rate_limit = 0           # local demo: no limit
+reply_path = "reply"
+tool_calls_path = "tool_calls"
+
+[target.headers]
+Content-Type = "application/json"
+
+[target.body]
+message = "{{input}}"
+document = "{{document}}"
+messages = "{{messages}}"
+
+[detect]
+# The demo bot's system prompt contains this planted phrase.
+system_prompt_canary = "PLUM-ZEBRA-4471"
