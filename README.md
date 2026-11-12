@@ -30,6 +30,7 @@ JUnit XML output.
 ## Quick start
 
 ```bash
+pipx install git+https://github.com/abhi12337/inject-test   # straight from GitHub
 pipx install .                    # from a clone of this repo (or: pip install .)
 
 inject-test init                  # writes inject-test.toml (inject-test.json on Python 3.10)
